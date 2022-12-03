@@ -1,0 +1,9 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+OAuth
+{% endblock %}
+
+{% block content %}
+    <a href="{% url "social:begin" "github" %}">GitHub</a>
+{% endblock %}

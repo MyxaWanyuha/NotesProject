@@ -1,0 +1,15 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+Create note
+{% endblock %}
+
+{% block content %}
+    <form method="post">
+        {% csrf_token %}
+        {{ form.title }}
+        {{ form.body }}
+        <button type="submit" class="btn btn-success"></button>
+        <span>{{ error }}</span>
+    </form>
+{% endblock %}
