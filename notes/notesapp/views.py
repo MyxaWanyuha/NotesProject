@@ -1,11 +1,7 @@
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
-from django.shortcuts import render
-from django.template import loader
+from django.shortcuts import render, redirect
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics
 from rest_framework.filters import SearchFilter, OrderingFilter
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 
 from notesapp.forms import NoteForm
@@ -43,23 +39,34 @@ def auth(request):
 
 
 def index(request):
-    d = {
-        'is_authenticated': request.user.is_authenticated,
-         'notes': Note.objects.all()
+    error = ''
+    if request.user.is_authenticated is False:
+        error = 'Пользователь не авторизован!'
+        return redirect('/auth')
+
+    context = {
+         'notes': Note.objects.filter(owner=request.user).order_by('-id')
     }
     # order_by('id')
-    return render(request, 'index.html', d)
+    return render(request, 'index.html', context)
 
 
 def add_note(request):
     error = ''
-    if request.method == 'POST' and request.user.is_authenticated:
+    if request.user.is_authenticated is False:
+        error = 'Пользователь не авторизован!'
+        return redirect('/auth')
+
+    if request.method == 'POST':
         form = NoteForm(request.POST)
         if form.is_valid():
-            form.save()
-            # return redirect('home')
+            contact = form.save(commit=False)
+            contact.owner = request.user
+            contact.save()
+            return redirect('/')
         else:
             error = 'Форма невалидна!'
+
     form = NoteForm()
     context = {
         'error': error,

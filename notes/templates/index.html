@@ -5,13 +5,11 @@ NotesProject
 {% endblock %}
 
 {% block content %}
-    {% if is_authenticated %}
-        {% for el in notes %}
-            <div class="alert alert-warning mt-2">
-                <h3>{{ el.title }}</h3>
-                <p>{{ el.body }}</p>
-                <p>{{ el.date }}</p>
-            </div>
-        {% endfor %}
-    {% endif %}
+    {% for el in notes %}
+        <div class="alert alert-warning mt-2">
+            <h3>{{ el.title }}</h3>
+            <p>{{ el.body }}</p>
+            <p>{{ el.date }}</p>
+        </div>
+    {% endfor %}
 {% endblock %}
