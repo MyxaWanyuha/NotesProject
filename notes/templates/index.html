@@ -10,6 +10,14 @@ NotesProject
             <h3>{{ el.title }}</h3>
             <p>{{ el.body }}</p>
             <p>{{ el.date }}</p>
+            <form method="post" action="/deletenote/">
+                {% csrf_token %}
+                <input type='hidden' value='{{ el.id }}' name='id'>
+                <button type="submit" class="btn btn-warning">Удалить</button>
+            </form>
+            <form method="get" action="/{{ el.id }}/update">
+                <button type="submit" class="btn btn-warning">Изменить</button>
+            </form>
         </div>
     {% endfor %}
 {% endblock %}

@@ -1,37 +1,19 @@
 from django.shortcuts import render, redirect
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import generics
-from rest_framework.filters import SearchFilter, OrderingFilter
-from rest_framework.viewsets import ModelViewSet
+from django.views.generic import UpdateView
 
 from notesapp.forms import NoteForm
 from notesapp.models import Note
-from notesapp.permissions import IsOwner
-from notesapp.serializers import NoteSerializer
 
 
-class NoteList(generics.ListCreateAPIView):
-    queryset = Note.objects.all()
-    serializer_class = NoteSerializer
+class NoteUpdateView(UpdateView):
+    model = Note
+    template_name = 'addnote.html'
+    form_class = NoteForm
 
-
-class NoteDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Note.objects.all()
-    serializer_class = NoteSerializer
-
-
-class NoteViewSet(ModelViewSet):
-    queryset = Note.objects.all()
-    serializer_class = NoteSerializer
-    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filter_fields = ['title']
-    search_fields = ['date', 'body']
-    ordering_fields = ['title']
-    permission_classes = [IsOwner]
-
-    def perform_create(self, serializer):
-        serializer.validated_data['owner'] = self.request.user
-        serializer.save()
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['buttontext'] = 'Изменить'
+        return context
 
 
 def auth(request):
@@ -41,20 +23,17 @@ def auth(request):
 def index(request):
     error = ''
     if request.user.is_authenticated is False:
-        error = 'Пользователь не авторизован!'
         return redirect('/auth')
 
     context = {
          'notes': Note.objects.filter(owner=request.user).order_by('-id')
     }
-    # order_by('id')
     return render(request, 'index.html', context)
 
 
 def add_note(request):
     error = ''
     if request.user.is_authenticated is False:
-        error = 'Пользователь не авторизован!'
         return redirect('/auth')
 
     if request.method == 'POST':
@@ -71,7 +50,30 @@ def add_note(request):
     context = {
         'error': error,
         'form': form,
-        'is_authenticated': request.user.is_authenticated,
+        'notes': Note.objects.all(),
+        'buttontext': 'Создать'
+    }
+    return render(request, 'addnote.html', context)
+
+
+def delete_note(request):
+    if request.user.is_authenticated is False:
+        return redirect('/auth')
+
+    if request.method == 'POST':
+        id = request.POST.get('id')
+        instance = Note.objects.get(id=id)
+        instance.delete()
+    return redirect('/')
+
+
+def update_note(request):
+    if request.user.is_authenticated is False:
+        return redirect('/auth')
+
+    form = NoteForm()
+    context = {
+        'form': form,
         'notes': Note.objects.all()
     }
     return render(request, 'addnote.html', context)

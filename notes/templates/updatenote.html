@@ -1,7 +1,7 @@
 {% extends 'layout.html' %}
 
 {% block title %}
-Создать заметку
+Изменить заметку
 {% endblock %}
 
 {% block content %}
@@ -9,7 +9,7 @@
         {% csrf_token %}
         {{ form.title }}
         {{ form.body }}
-        <button type="submit" class="btn btn-success">{{ buttontext }}</button>
+        <button type="submit" class="btn btn-success">Создать</button>
         <span>{{ error }}</span>
     </form>
 {% endblock %}
