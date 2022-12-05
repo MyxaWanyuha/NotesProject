@@ -8,7 +8,7 @@ NotesProject
     {% for el in notes %}
         <div class="alert alert-warning mt-2">
             <h3>{{ el.title }}</h3>
-            <p>{{ el.body }}</p>
+            <p>{{ el.body|safe }}</p>
             <p>{{ el.date }}</p>
             <form method="post" action="/deletenote/">
                 {% csrf_token %}

@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.views.generic import UpdateView
+from django.views.generic import UpdateView, CreateView
 
 from notesapp.forms import NoteForm
 from notesapp.models import Note
@@ -65,15 +65,3 @@ def delete_note(request):
         instance = Note.objects.get(id=id)
         instance.delete()
     return redirect('/')
-
-
-def update_note(request):
-    if request.user.is_authenticated is False:
-        return redirect('/auth')
-
-    form = NoteForm()
-    context = {
-        'form': form,
-        'notes': Note.objects.all()
-    }
-    return render(request, 'addnote.html', context)
