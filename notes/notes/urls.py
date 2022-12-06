@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include, re_path
 
-from notesapp.views import auth, index, add_note, delete_note, NoteUpdateView
+from notesapp.views import auth, index, add_note, delete_note, NoteUpdateView, search
 
 urlpatterns = [
     path('', index),
@@ -12,5 +12,5 @@ urlpatterns = [
     path('deletenote/', delete_note),
     re_path(r'^tinymce/', include('tinymce.urls')),
     path('<int:pk>/update', NoteUpdateView.as_view()),
+    path('search/', search),
 ]
-

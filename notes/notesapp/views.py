@@ -1,8 +1,23 @@
+from django.db.models import Q
 from django.shortcuts import render, redirect
-from django.views.generic import UpdateView, CreateView
+from django.views.generic import UpdateView, CreateView, ListView
 
 from notesapp.forms import NoteForm
 from notesapp.models import Note
+
+
+def search(request):
+    error = ''
+    if request.user.is_authenticated is False:
+        return redirect('/auth')
+    if request.method == 'GET':
+        query = request.GET.get("q")
+        context = {
+         'notes': Note.objects.filter(Q(title__iregex=query) | Q(body__iregex=query))
+        }
+        return render(request, 'index.html', context)
+    else:
+        redirect('/')
 
 
 class NoteUpdateView(UpdateView):

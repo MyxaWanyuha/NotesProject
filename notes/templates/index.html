@@ -5,6 +5,9 @@ NotesProject
 {% endblock %}
 
 {% block content %}
+<form action="/search/" method="get">
+  <input name="q" type="text" placeholder="Search...">
+</form>
     {% for el in notes %}
         <div class="alert alert-warning mt-2">
             <h3>{{ el.title }}</h3>
