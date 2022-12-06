@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure--$a@ia023u0ckv932s9%2e6_$z31&qr&+2o6c(0e812$=gf=x2
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.1.189', '188.226.41.51', '127.0.0.1']
+ALLOWED_HOSTS = ['127.0.0.1', '192.168.1.189', '188.226.41.51']
 
 
 # Application definition
@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 
     'tinymce',
     'social_django',
+    'taggit',
 
     'notesapp',
 ]

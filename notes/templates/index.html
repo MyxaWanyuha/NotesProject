@@ -13,6 +13,9 @@ NotesProject
             <h3>{{ el.title }}</h3>
             <p>{{ el.body|safe }}</p>
             <p>{{ el.date }}</p>
+            {% for tag in el.tags.all %}
+            <p>{{ tag }}</p>
+            {% endfor %}
             <form method="post" action="/deletenote/">
                 {% csrf_token %}
                 <input type='hidden' value='{{ el.id }}' name='id'>
