@@ -1,7 +1,9 @@
+import logging
 import sys
 
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.messages.storage import session
 from django.db.models import Q
 from django.shortcuts import render, redirect
 from django.views.generic import UpdateView, FormView, CreateView
@@ -82,12 +84,16 @@ class NoteUpdateView(UpdateView):
 
 def index(request):
     error = ''
-    print(request.user)
     if request.user.is_authenticated is False:
         return redirect('/login')
 
+    sort_by = 'title'
+    if request.method == 'POST':
+        sort_by = request.POST['sort_by']
+
     context = {
-        'notes': Note.objects.filter(owner=request.user).order_by('-id')
+        'notes': Note.objects.filter(owner=request.user).order_by(sort_by),
+        'sort_option': sort_by
     }
     return render(request, 'index.html', context)
 

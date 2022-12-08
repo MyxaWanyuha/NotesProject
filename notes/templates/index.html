@@ -8,6 +8,26 @@ NotesProject
 <form action="/search/" method="get">
   <input name="q" type="text" placeholder="Search...">
 </form>
+
+<form action="/" method="post" name="form1">
+{% csrf_token %}
+ <select name="sort_by">
+  <option value="-date" {% if sort_option == '-date' %} selected {% endif %}>
+     По дате↓</option>
+  <option value="-title"  {% if sort_option == '-title' %} selected {% endif %}>
+     По названию↓</option>
+  <option value="-body"  {% if sort_option == '-body' %} selected {% endif %}>
+     По тексту↓</option>
+  <option value="date" {% if sort_option == 'date' %} selected {% endif %}>
+     По дате↑</option>
+  <option value="title" {% if sort_option == 'title' %} selected {% endif %}>
+     По названию↑</option>
+  <option value="body" {% if sort_option == 'body' %} selected {% endif %}>
+     По тексту↑</option>
+ </select>
+ <p><input type="submit" value="Отправить"></p>
+</form>
+
     {% for el in notes %}
         <div class="alert alert-warning mt-2">
             <h3>{{ el.title }}</h3>
