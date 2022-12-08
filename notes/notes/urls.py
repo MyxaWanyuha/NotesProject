@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import path, include, re_path
 
 from notesapp.views import index, add_note, delete_note, NoteUpdateView, search, RegisterFormView, \
-    logout_view, login_request
+    logout_view, login_request, add_tag
 
 urlpatterns = [
     path('', index),
@@ -16,4 +16,5 @@ urlpatterns = [
     path('register/', RegisterFormView.as_view()),
     path('login/', login_request),
     path('logout/', logout_view),
+    path('addtag/', add_tag),
 ]

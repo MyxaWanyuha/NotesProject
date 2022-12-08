@@ -25,6 +25,14 @@ NotesProject
   <option value="body" {% if sort_option == 'body' %} selected {% endif %}>
      По тексту↑</option>
  </select>
+
+ <select name="group_by">
+  <option value='' {% if group_option == '' %} selected {% endif %}>Без группировки</option>
+     {% for e in tags %}
+     <option value={{ e|safe }} {% if group_option == e|safe %} selected {% endif %}>{{ e }}</option>
+     {% endfor %}
+ </select>
+
  <p><input type="submit" value="Отправить"></p>
 </form>
 

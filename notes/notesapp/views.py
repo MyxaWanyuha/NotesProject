@@ -7,6 +7,8 @@ from django.contrib.messages.storage import session
 from django.db.models import Q
 from django.shortcuts import render, redirect
 from django.views.generic import UpdateView, FormView, CreateView
+from taggit.models import Tag
+
 from notesapp.forms import NoteForm
 from notesapp.models import Note
 from django.contrib import messages
@@ -82,18 +84,32 @@ class NoteUpdateView(UpdateView):
         return context
 
 
+def add_tag(request):
+    pass
+
+
 def index(request):
     error = ''
     if request.user.is_authenticated is False:
         return redirect('/login')
 
     sort_by = 'title'
+    group_by = ''
     if request.method == 'POST':
         sort_by = request.POST['sort_by']
+        group_by = request.POST['group_by']
+
+    notes = None
+    if group_by == '':
+        notes = Note.objects.filter(owner=request.user).order_by(sort_by)
+    else:
+        notes = Note.objects.filter(owner=request.user, tags__name__in=[group_by]).order_by(sort_by)
 
     context = {
-        'notes': Note.objects.filter(owner=request.user).order_by(sort_by),
-        'sort_option': sort_by
+        'notes': notes,
+        'sort_option': sort_by,
+        'tags': Tag.objects.filter(note__owner=request.user),
+        'group_option': group_by,
     }
     return render(request, 'index.html', context)
 
