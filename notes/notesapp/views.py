@@ -1,8 +1,8 @@
 import logging
 import sys
 
-from django.contrib.auth import login, logout, authenticate
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, PasswordChangeForm
 from django.contrib.messages.storage import session
 from django.db.models import Q
 from django.shortcuts import render, redirect
@@ -12,6 +12,7 @@ from taggit.models import Tag
 from notesapp.forms import NoteForm
 from notesapp.models import Note
 from django.contrib import messages
+
 
 def logout_view(request):
     if request.user.is_authenticated is False:
@@ -80,12 +81,18 @@ class NoteUpdateView(UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['buttontext'] = 'Изменить'
+        context['isCreating'] = 0
         return context
 
 
-def add_tag(request):
-    pass
+def note(request, pk):
+    if request.user.is_authenticated is False:
+        return redirect('/login')
+    note = Note.objects.get(owner=request.user, id=pk)
+    error = ''
+    if note is None:
+        error = 'Can\'t find note'
+    return render(request, 'note.html', {'error': error, 'el': note})
 
 
 def index(request):
@@ -134,17 +141,33 @@ def add_note(request):
         'error': error,
         'form': form,
         'notes': Note.objects.all(),
-        'buttontext': 'Создать'
+        'isCreating': 1
     }
     return render(request, 'addnote.html', context)
 
 
-def delete_note(request):
+def delete_note(request, pk):
     if request.user.is_authenticated is False:
         return redirect('/login')
 
     if request.method == 'POST':
-        id = request.POST.get('id')
-        instance = Note.objects.get(id=id)
+        instance = Note.objects.get(owner=request.user, id=pk)
         instance.delete()
     return redirect('/')
+
+
+def change_password(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  # Important!
+            messages.success(request, 'Your password was successfully updated!')
+            return redirect('change_password')
+        else:
+            messages.error(request, 'Please correct the error below.')
+    else:
+        form = PasswordChangeForm(request.user)
+    return render(request, 'changepassword.html', {
+        'form': form
+    })

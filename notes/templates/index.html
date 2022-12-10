@@ -35,20 +35,19 @@ NotesProject
 
  <p><input type="submit" value="Отправить"></p>
 </form>
-
     {% for el in notes %}
         <div class="alert alert-warning mt-2">
             <h3>{{ el.title }}</h3>
             <p>{{ el.body|safe }}</p>
             <p>{{ el.date }}</p>
+            {% if el.isPrivate == 1 %}
+            <p>Приватная</p>
+            {% else %}
+            <p>Публичная</p>
+            {% endif %}
             {% for tag in el.tags.all %}
             <p>{{ tag }}</p>
             {% endfor %}
-            <form method="post" action="/deletenote/">
-                {% csrf_token %}
-                <input type='hidden' value='{{ el.id }}' name='id'>
-                <button type="submit" class="btn btn-warning">Удалить</button>
-            </form>
             <form method="get" action="/{{ el.id }}/update">
                 <button type="submit" class="btn btn-warning">Изменить</button>
             </form>

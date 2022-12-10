@@ -8,7 +8,7 @@ from notesapp.models import Note
 class NoteForm(ModelForm):
     class Meta:
         model = Note
-        fields = ['title', 'body']
+        fields = ['title', 'body', 'tags', 'isPrivate']
         widgets = {
             'title': TextInput(attrs={
                 'class': 'form-control',

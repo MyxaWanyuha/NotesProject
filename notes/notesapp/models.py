@@ -12,6 +12,7 @@ class Note(models.Model):
     date = models.DateTimeField(default=datetime.now())
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     tags = TaggableManager()
+    isPrivate = models.BooleanField(default=True)
 
     def __str__(self):
         return f'id {self.id}: {self.title} - {self.date}'

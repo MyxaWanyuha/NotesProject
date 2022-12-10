@@ -7,9 +7,21 @@
 {% block content %}
     <form method="post" name="myform" novalidate>
         {% csrf_token %}
-        {{ form.title }}
-        {{ form.body }}
-        <button type="submit" class="btn btn-success">{{ buttontext }}</button>
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success">
+            {% if isCreating == 1%}
+            Создать
+            {% else %}
+            Изменить
+            {% endif %}
+        </button>
         <span>{{ error }}</span>
     </form>
+    {% if isCreating == 0 %}
+        <form method="post" action={% url 'deletenote' object.pk %}>
+            {% csrf_token %}
+            <input type='hidden' value='{{ form.pk }}' name='id'>
+            <button type="submit" class="btn btn-warning">Удалить</button>
+        </form>
+    {% endif %}
 {% endblock %}
