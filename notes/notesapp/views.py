@@ -62,8 +62,11 @@ def search(request):
         return redirect('/login')
     if request.method == 'GET':
         query = request.GET.get("q")
+        base_url = "{0}://{1}{2}".format(request.scheme, request.get_host(), request.path)
+
         context = {
-            'notes': Note.objects.filter(Q(title__iregex=query) | Q(body__iregex=query))
+            'notes': Note.objects.filter(Q(title__iregex=query) | Q(body__iregex=query)),
+            'base_url': base_url
         }
         return render(request, 'index.html', context)
     else:
@@ -125,6 +128,11 @@ def index(request):
         'group_option': group_by,
     }
     return render(request, 'index.html', context)
+
+
+def user_account(request):
+    context = {'userform': request.user}
+    return render(request, 'user_account.html')
 
 
 def add_note(request):

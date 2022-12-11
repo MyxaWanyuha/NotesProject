@@ -3,7 +3,7 @@ from django.urls import path, include, re_path
 
 from notesapp import views
 from notesapp.views import index, add_note, delete_note, NoteUpdateView, search, RegisterFormView, \
-    logout_view, login_request, note
+    logout_view, login_request, note, user_account
 
 urlpatterns = [
     path('', index),
@@ -19,4 +19,5 @@ urlpatterns = [
     path('login/', login_request),
     path('logout/', logout_view),
     re_path(r'^password/$', views.change_password, name='change_password'),
+    path('user_account/', user_account),
 ]
