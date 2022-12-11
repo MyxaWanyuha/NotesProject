@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'tinymce',
     'social_django',
     'taggit',
+    'django_social_share',
 
     'notesapp',
 ]

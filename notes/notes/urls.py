@@ -13,7 +13,7 @@ urlpatterns = [
     path('<int:pk>/deletenote/', delete_note, name='deletenote'),
     re_path(r'^tinymce/', include('tinymce.urls')),
     path('<int:pk>/update', NoteUpdateView.as_view()),
-    path('<int:pk>', note),
+    path('<int:pk>', note, name='notelink'),
     path('search/', search),
     path('register/', RegisterFormView.as_view()),
     path('login/', login_request),

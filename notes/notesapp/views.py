@@ -1,12 +1,8 @@
-import logging
-import sys
-
 from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, PasswordChangeForm
-from django.contrib.messages.storage import session
 from django.db.models import Q
 from django.shortcuts import render, redirect
-from django.views.generic import UpdateView, FormView, CreateView
+from django.views.generic import UpdateView, CreateView
 from taggit.models import Tag
 
 from notesapp.forms import NoteForm
@@ -84,12 +80,22 @@ class NoteUpdateView(UpdateView):
         context['isCreating'] = 0
         return context
 
+    def get(self, request, *args, **kwargs):
+        pk = kwargs['pk']
+        note = Note.objects.get(id=pk)
+        if request.user != note.owner:
+            return redirect('/')
+        return super(NoteUpdateView, self).get(self, request, args, kwargs)
+
 
 def note(request, pk):
     if request.user.is_authenticated is False:
         return redirect('/login')
-    note = Note.objects.get(owner=request.user, id=pk)
     error = ''
+    note = Note.objects.get(id=pk)
+    if note.isPrivate is True and note.owner != request.user:
+        note = None
+
     if note is None:
         error = 'Can\'t find note'
     return render(request, 'note.html', {'error': error, 'el': note})
