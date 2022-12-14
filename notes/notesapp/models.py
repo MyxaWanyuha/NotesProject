@@ -11,7 +11,7 @@ class Note(models.Model):
     body = HTMLField()
     date = models.DateTimeField(default=datetime.now())
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    tags = TaggableManager()
+    tags = TaggableManager(blank=True)
     isPrivate = models.BooleanField(default=True)
 
     def __str__(self):

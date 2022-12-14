@@ -53,8 +53,7 @@ NotesProject
             </form>
 
             {% load social_share %}
-            {% copy_to_clipboard urlcopy "Copy to clipboard!" %}
-
+            {% copy_to_clipboard el.id %}
             {% add_copy_script %}
         </div>
     {% endfor %}
