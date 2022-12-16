@@ -1,0 +1,158 @@
+/* WiFi Example
+ * Copyright (c) 2016 ARM Limited
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "mbed.h"
+#include <cstdio>
+#include <string>
+#define MQTTCLIENT_QOS2 1
+
+#include "MQTTmbed.h"
+#include "MQTTClientMbedOs.h"
+
+auto topicPump = "/class/stand5/pump";
+auto topic = "/class/stand5/humidity";// отправка показаний 
+MQTTClient* client;
+SocketAddress socketAddress;
+TCPSocket socket;
+WiFiInterface *wifi;
+
+AnalogIn soilSensor(PinName::A0);
+DigitalOut pumpKey(PinName::D10);
+bool isWatering = false;
+const float minHumidity = 0.15f;
+const int wateringTime = 1000; //1 sec
+const int checkHumidityTime = 500;
+
+void SendMessage(const char* topicName, const std::string& mesStr)
+{
+    MQTT::Message message;
+    message.qos = MQTT::QOS0;
+    message.retained = false;
+    message.dup = false;
+    message.payload = (void*)mesStr.c_str();
+    message.payloadlen = mesStr.length() + 1;
+    int rc = client->publish(topicName, message);
+}
+
+void Watering()
+{
+    printf("start watering\n");
+    if(isWatering) return;
+    SendMessage(topicPump, "watering\r\n");
+    isWatering = true;
+    pumpKey.write(255); // on
+    client->yield(wateringTime);
+    pumpKey.write(0); // off
+    isWatering = false;
+    printf("stop watering\n");
+}
+
+void CheckHumidityControlPump()
+{
+    while(1)
+    {
+        float humidity = soilSensor.read();
+        std::string mesHumidity = "humidity " + std::to_string(humidity) + "\r\n";
+        SendMessage(topic, mesHumidity);
+        printf("%s", mesHumidity.c_str());
+        if(humidity < minHumidity)
+            Watering();
+        client->yield(checkHumidityTime);
+    }
+}
+
+void MessageArrivedPump(MQTT::MessageData& md)
+{
+    MQTT::Message &message = md.message;
+    printf("Message arrived: qos %d, retained %d, dup %d, packetid %d\r\n", message.qos, message.retained, message.dup, message.id);
+    printf("Payload %.*s\r\n", message.payloadlen, (char*)message.payload);
+    if(message.payloadlen == 2 && ((char*)message.payload)[0] == 'd' && ((char*)message.payload)[1] == 'o')
+        Watering();
+}
+
+void InitMQTT(NetworkInterface *net)
+{
+    client = new MQTTClient(&socket);
+
+    auto hostname = "192.168.88.100";
+    net->gethostbyname(hostname, &socketAddress);
+    int port = 1883;
+    socketAddress.set_port(port);
+
+    printf("Connecting to %s:%d\r\n", hostname, port);
+
+    socket.open(net);
+    printf("Opened socket\n\r");
+    int rc = socket.connect(socketAddress);
+    if (rc != 0)
+        printf("rc from TCP connect is %d\r\n", rc);
+    printf("Connected socket\n\r");
+ 
+    MQTTPacket_connectData data = MQTTPacket_connectData_initializer;
+    data.MQTTVersion = 3;
+    data.clientID.cstring = "mbed-user5";
+    data.username.cstring = "testuser";
+    data.password.cstring = "testpassword";
+    
+    if ((rc = client->connect(data)) != 0)
+        printf("rc from MQTT connect is %d\r\n", rc);
+ 
+    if ((rc = client->subscribe(topicPump, MQTT::QOS2, MessageArrivedPump)) != 0)
+        printf("rc from MQTT subscribe is %d\r\n", rc);
+}
+
+void InitWifi()
+{
+    printf("WiFi example\n");
+#ifdef MBED_MAJOR_VERSION
+    printf("Mbed OS version %d.%d.%d\n\n", MBED_MAJOR_VERSION, MBED_MINOR_VERSION, MBED_PATCH_VERSION);
+#endif
+
+    wifi = WiFiInterface::get_default_instance();
+    if (!wifi) {
+        printf("ERROR: No WiFiInterface found.\n");
+        return;
+    }
+
+    printf("\nConnecting to %s...\n", MBED_CONF_APP_WIFI_SSID);
+    int ret = wifi->connect(MBED_CONF_APP_WIFI_SSID, MBED_CONF_APP_WIFI_PASSWORD, NSAPI_SECURITY_WPA_WPA2);
+    if (ret == -3015) {
+        printf("Already connected!\n\r");
+    }
+    else if (ret != 0) {
+        printf("\nConnection error: %d\n", ret);
+        return;
+    }
+    
+    printf("Success\n\n");
+    printf("MAC: %s\n", wifi->get_mac_address());
+    printf("IP: %s\n", wifi->get_ip_address());
+    printf("Netmask: %s\n", wifi->get_netmask());
+    printf("Gateway: %s\n", wifi->get_gateway());
+    printf("RSSI: %d\n\n", wifi->get_rssi());
+}
+
+int main()
+{
+    InitWifi();
+    InitMQTT(wifi);
+
+    CheckHumidityControlPump();
+
+    wifi->disconnect();
+    delete client;
+    printf("\nExit\n");
+}

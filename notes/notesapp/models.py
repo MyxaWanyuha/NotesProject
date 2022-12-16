@@ -13,6 +13,7 @@ class Note(models.Model):
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     tags = TaggableManager(blank=True)
     isPrivate = models.BooleanField(default=True)
+    uploadedFile = models.FileField(blank=True)
 
     def __str__(self):
         return f'id {self.id}: {self.title} - {self.date}'

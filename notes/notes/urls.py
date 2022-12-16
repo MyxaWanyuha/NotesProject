@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include, re_path
+from django.conf import settings
+from django.conf.urls.static import static
 
 from notesapp import views
 from notesapp.views import index, add_note, delete_note, NoteUpdateView, search, RegisterFormView, \
@@ -20,4 +22,4 @@ urlpatterns = [
     path('logout/', logout_view),
     re_path(r'^password/$', views.change_password, name='change_password'),
     path('user_account/', user_account),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

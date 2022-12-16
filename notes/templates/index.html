@@ -40,6 +40,8 @@ NotesProject
             <h3>{{ el.title }}</h3>
             <p>{{ el.body|safe }}</p>
             <p>{{ el.date }}</p>
+            {{ el.uploadedFile }}
+
             {% if el.isPrivate == 1 %}
             <p>Приватная</p>
             {% else %}
